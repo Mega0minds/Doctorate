@@ -1,3 +1,4 @@
+import 'package:docrate/cont_signup.dart';
 import 'package:docrate/login.dart';
 import 'package:docrate/utilities/resource.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,9 @@ class _SignupState extends State<Signup> {
                               fontSize: 16,
                             ),
                           ),
+                          const SizedBox(
+                            height: 12,
+                          ),
                           TextFormField(
                             decoration: const InputDecoration(
                               labelText: "Enter Full Name",
@@ -92,6 +96,9 @@ class _SignupState extends State<Signup> {
                               fontWeight: AppWeight.signPage,
                               fontSize: 16,
                             ),
+                          ),
+                          const SizedBox(
+                            height: 12,
                           ),
                           TextFormField(
                             decoration: const InputDecoration(
@@ -137,7 +144,7 @@ class _SignupState extends State<Signup> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const LogIn(),
+                                        builder: (context) => const ContSignup(),
                                       ),
                                     );
                                   }
@@ -172,7 +179,7 @@ class _SignupState extends State<Signup> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const Signup(),
+                                      builder: (context) => const LogIn(),
                                     ),
                                   );
                                 },
