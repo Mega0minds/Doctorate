@@ -1,5 +1,4 @@
 import 'package:docrate/login.dart';
-import 'package:docrate/signup.dart';
 import 'package:docrate/utilities/resource.dart';
 import 'package:flutter/material.dart';
 
