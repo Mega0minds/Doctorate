@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "927971756351",
+    "project_id": "doctorate-9d101",
+    "storage_bucket": "doctorate-9d101.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927971756351:android:49c9472860464062962b8a",
+        "android_client_info": {
+          "package_name": "com.example.docrate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuF8EemSlavdUweJEDC_Y_jUf5SB46fd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
