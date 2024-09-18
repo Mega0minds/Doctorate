@@ -1,3 +1,4 @@
+import 'package:docrate/login.dart';
 import 'package:docrate/signup.dart';
 import 'package:docrate/utilities/resource.dart';
 import 'package:flutter/material.dart';
@@ -10,15 +11,10 @@ class ContSignup extends StatefulWidget {
 }
 
 class _ContSignupState extends State<ContSignup> {
-  final _emailController = TextEditingController();
+  final _Controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _showError = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
+  bool _Password = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +27,7 @@ class _ContSignupState extends State<ContSignup> {
               height: 40,
             ),
             const Text(
-              "Sign In",
+              "Sign Up",
               style: TextStyle(
                 color: AppColor.black,
                 fontWeight: AppWeight.mainweight,
@@ -67,7 +63,7 @@ class _ContSignupState extends State<ContSignup> {
                                 height: 12,
                               ),
                               TextFormField(
-                                controller: _emailController,
+                                controller: _Controller,
                                 decoration: const InputDecoration(
                                   labelText: "Set Password",
                                   border: OutlineInputBorder(
@@ -78,29 +74,28 @@ class _ContSignupState extends State<ContSignup> {
                                   ),
                                 ),
                                 validator: (value) {
-                                  if (value!.isNotEmpty &&
-                                      value.contains('@')) {
+                                  if (value!.isNotEmpty && value.length > 6) {
                                     setState(() {
-                                      _showError = false;
+                                      _Password = false;
                                     });
                                     return null;
                                   } else {
                                     setState(() {
-                                      _showError = true;
+                                      _Password = true;
                                     });
                                     return "";
                                   }
                                 },
                               ),
-                              if (_showError)
+                              if (_Password)
                                 const Text(
-                                  'Enter valid Email here',
+                                  'Password must be more than 6 characters',
                                   style: TextStyle(color: Colors.red),
                                 ),
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                const Text(
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              const Text(
                                 "Confirm password",
                                 style: TextStyle(
                                   fontSize: 16,
@@ -111,7 +106,6 @@ class _ContSignupState extends State<ContSignup> {
                                 height: 12,
                               ),
                               TextFormField(
-                                controller: _emailController,
                                 decoration: const InputDecoration(
                                   labelText: "Confirm password",
                                   border: OutlineInputBorder(
@@ -123,7 +117,7 @@ class _ContSignupState extends State<ContSignup> {
                                 ),
                                 validator: (value) {
                                   if (value!.isNotEmpty &&
-                                      value.contains('@')) {
+                                      value == _Controller.text) {
                                     setState(() {
                                       _showError = false;
                                     });
@@ -138,7 +132,7 @@ class _ContSignupState extends State<ContSignup> {
                               ),
                               if (_showError)
                                 const Text(
-                                  'Enter valid Email here',
+                                  'Confirm Password again',
                                   style: TextStyle(color: Colors.red),
                                 ),
                             ],
@@ -185,7 +179,7 @@ class _ContSignupState extends State<ContSignup> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Don't have an account?",
+                  "Already have an account?",
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: AppWeight.createAccount,
@@ -197,12 +191,12 @@ class _ContSignupState extends State<ContSignup> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const Signup(),
+                        builder: (context) => const LogIn(),
                       ),
                     );
                   },
                   child: const Text(
-                    "Create Account",
+                    "Sign In",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: AppWeight.secondCreate,
