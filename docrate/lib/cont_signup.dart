@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docrate/Firebase_Files/Firebase_authservice.dart';
 import 'package:docrate/login.dart';
 import 'package:docrate/utilities/resource.dart';
@@ -245,6 +246,10 @@ class _ContSignupState extends State<ContSignup> {
       if (user != null) {
         // Save the username in the database or Firestore if necessary
         print("User is successfully created with username: ${widget.username}");
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'username': widget.username,
+        'email': widget.email,
+      });
         // Navigate to the next screen or show success message
         Navigator.pop(context); // or any other navigation logic
       } else {
