@@ -12,7 +12,9 @@ class LogIn extends StatefulWidget {
 
 class LogInState extends State<LogIn> {
   final _emailController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
+
   bool _showError = false;
 
   @override
@@ -119,7 +121,7 @@ class LogInState extends State<LogIn> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ContLogin(),
+                            builder: (context) => const ContSignup(username: AutofillHints.username, email: AutofillHints.email),
                           ),
                         );
                       }
