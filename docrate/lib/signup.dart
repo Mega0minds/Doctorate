@@ -19,7 +19,8 @@ class _SignupState extends State<Signup> {
   bool _showError = false;
   bool _showUser = false;
   bool _isLoading = false;
-  // bool _showUserError = false;
+  bool _showUserError = false;
+  bool _emailExist = false;
   // bool isUsernameTaken = false;
 
   @override
@@ -93,11 +94,12 @@ class _SignupState extends State<Signup> {
                           'Invalid Name',
                           style: TextStyle(color: Colors.red),
                         ),
-                      // if (_showUserError)
-                      //   const Text(
-                      //     "User already exists",
-                      //     style: TextStyle(color: Colors.red),
-                      //   ),
+                      if (_showUserError)
+                        const Text(
+                          "User already exists",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      
                       const SizedBox(height: 16),
                       const Text(
                         "Email Address",
@@ -133,6 +135,11 @@ class _SignupState extends State<Signup> {
                       if (_showError)
                         const Text(
                           'Invalid Email',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        if (_emailExist)
+                        const Text(
+                          "Email already exist",
                           style: TextStyle(color: Colors.red),
                         ),
                       const SizedBox(height: 32),
@@ -252,12 +259,14 @@ class _SignupState extends State<Signup> {
 
     // Check if username exists
     bool isUsernameTaken = await _checkIfUsernameExists(username);
+    bool isEmailTaken = await _checkIfEmailExists(email);
+
     print(isUsernameTaken);
     print(username);
     if (isUsernameTaken == true) {
       setState(() {
         _isLoading = false;
-        // _showUserError = true; // Show error message
+        _showUserError = true; // Show error message
       });
       print("exist");
     } else {
@@ -266,28 +275,40 @@ class _SignupState extends State<Signup> {
         _isLoading = false;
       });
       // Proceed with navigation to the next screen
-      print("Does't exist");
+      if(isEmailTaken == true){
+              setState(() {
+        _isLoading = false;
+        _emailExist = true; // Show error message
+      });
+      print("exist");
+      }else{
+              print("Does't exist");
       await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ContSignup(username: username, email: email),
         ),
       );
+      }
+
     }
   }
 
   // Function to check if the username exists in Firestore
   Future<bool> _checkIfUsernameExists(String username) async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('username', isEqualTo: username)
-          .get();
-      print("succsess");
-      return querySnapshot.docs.isNotEmpty;
-    } catch (e) {
-      print("Error checking username existence: $e");
-      return false; // Return false or handle the error appropriately
-    }
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .get();
+    print("succsess");
+    return querySnapshot.docs.isNotEmpty;
+  }
+
+  Future<bool> _checkIfEmailExists(String email) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    return querySnapshot.docs.isNotEmpty;
   }
 }
