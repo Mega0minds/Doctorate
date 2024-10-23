@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docrate/cont_signup.dart';
 import 'package:docrate/login.dart';
 import 'package:docrate/utilities/resource.dart';
@@ -12,22 +11,23 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String? _name;
+  String? _email;
 
-  bool _showError = false;
-  bool _showUser = false;
-  bool _isLoading = false;
-  bool _showUserError = false;
-  bool _emailExist = false;
-  // bool isUsernameTaken = false;
+  void _proceed() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      String username = _name!.trim();
+      String email = _email!.toLowerCase().trim();
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    super.dispose();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ContSignup(username: username, email: email)),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -67,7 +67,6 @@ class _SignupState extends State<Signup> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
-                        controller: _nameController,
                         decoration: const InputDecoration(
                           labelText: "Enter Full Name",
                           border: OutlineInputBorder(
@@ -76,30 +75,15 @@ class _SignupState extends State<Signup> {
                           ),
                         ),
                         validator: (value) {
-                          if (value!.isNotEmpty) {
-                            setState(() {
-                              _showUser = false;
-                            });
-                            return null;
-                          } else {
-                            setState(() {
-                              _showUser = true;
-                            });
+                          if (value!.isEmpty) {
                             return "Invalid Name";
                           }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _name = value!;
                         },
                       ),
-                      if (_showUser)
-                        const Text(
-                          'Invalid Name',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      if (_showUserError)
-                        const Text(
-                          "User already exists",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      
                       const SizedBox(height: 16),
                       const Text(
                         "Email Address",
@@ -110,7 +94,6 @@ class _SignupState extends State<Signup> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
-                        controller: _emailController,
                         decoration: const InputDecoration(
                           labelText: "Enter email address",
                           border: OutlineInputBorder(
@@ -119,57 +102,28 @@ class _SignupState extends State<Signup> {
                           ),
                         ),
                         validator: (value) {
-                          if (value!.isNotEmpty && value.contains(".")) {
-                            setState(() {
-                              _showError = false;
-                            });
-                            return null;
-                          } else {
-                            setState(() {
-                              _showError = true;
-                            });
+                          if (value!.isEmpty ||
+                              !value.contains(".") ||
+                              !value.contains("@")) {
                             return "Invalid Email";
                           }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _email = value!;
                         },
                       ),
-                      if (_showError)
-                        const Text(
-                          'Invalid Email',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                        if (_emailExist)
-                        const Text(
-                          "Email already exist",
-                          style: TextStyle(color: Colors.red),
-                        ),
                       const SizedBox(height: 32),
-                      GestureDetector(
-                        onTap: null,
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                if (!_isLoading) {
-                                  setState(() {
-                                    _isLoading = true; // Show loading indicator
-                                  });
-                                  await _signUp(); // Call _signUp directly
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: const Size(237, 56),
-                              backgroundColor: AppColor.primary,
-                            ),
-                            child: _isLoading
-                                ? const CircularProgressIndicator(
-                                    color: AppColor.white,
-                                  )
-                                : const Text(
-                                    "Continue",
-                                    style: TextStyle(color: AppColor.white),
-                                  ),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _proceed,
+                          style: ElevatedButton.styleFrom(
+                            fixedSize: const Size(237, 56),
+                            backgroundColor: AppColor.primary,
+                          ),
+                          child: const Text(
+                            "Continue",
+                            style: TextStyle(color: AppColor.white),
                           ),
                         ),
                       ),
@@ -251,64 +205,5 @@ class _SignupState extends State<Signup> {
         ),
       ),
     );
-  }
-
-  Future<void> _signUp() async {
-    String username = _nameController.text;
-    String email = _emailController.text;
-
-    // Check if username exists
-    bool isUsernameTaken = await _checkIfUsernameExists(username);
-    bool isEmailTaken = await _checkIfEmailExists(email);
-
-    print(isUsernameTaken);
-    print(username);
-    if (isUsernameTaken == true) {
-      setState(() {
-        _isLoading = false;
-        _showUserError = true; // Show error message
-      });
-      print("exist");
-    } else {
-      setState(() {
-        // _showUserError = false;
-        _isLoading = false;
-      });
-      // Proceed with navigation to the next screen
-      if(isEmailTaken == true){
-              setState(() {
-        _isLoading = false;
-        _emailExist = true; // Show error message
-      });
-      print("exist");
-      }else{
-              print("Does't exist");
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ContSignup(username: username, email: email),
-        ),
-      );
-      }
-
-    }
-  }
-
-  // Function to check if the username exists in Firestore
-  Future<bool> _checkIfUsernameExists(String username) async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .get();
-    print("succsess");
-    return querySnapshot.docs.isNotEmpty;
-  }
-
-  Future<bool> _checkIfEmailExists(String email) async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('email', isEqualTo: email)
-        .get();
-    return querySnapshot.docs.isNotEmpty;
   }
 }

@@ -7,10 +7,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ContSignup extends StatefulWidget {
   const ContSignup({
-    Key? key,
+    super.key,
     required this.username,
     required this.email,
-  }) : super(key: key);
+  });
 
   final String username;
   final String email;
@@ -24,7 +24,6 @@ class _ContSignupState extends State<ContSignup> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool _showError = false;
   bool _passwordValid = false;
   bool _isLoading = false;
 
@@ -74,24 +73,25 @@ class _ContSignupState extends State<ContSignup> {
                             labelText: "Set Password",
                             border: OutlineInputBorder(
                               borderSide: BorderSide(width: 1),
-                              borderRadius: BorderRadius.all(Radius.circular(16)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16)),
                             ),
                           ),
                           validator: (value) {
                             if (value != null && value.length > 6) {
                               setState(() {
-                                _passwordValid = true;
+                                _passwordValid = false;
                               });
                               return null;
                             } else {
                               setState(() {
-                                _passwordValid = false;
+                                _passwordValid = true;
                               });
                               return "Password must be more than 6 characters";
                             }
                           },
                         ),
-                        if (!_passwordValid)
+                        if (_passwordValid)
                           const Text(
                             'Password must be more than 6 characters',
                             style: TextStyle(color: Colors.red),
@@ -110,28 +110,18 @@ class _ContSignupState extends State<ContSignup> {
                             labelText: "Confirm Password",
                             border: OutlineInputBorder(
                               borderSide: BorderSide(width: 1),
-                              borderRadius: BorderRadius.all(Radius.circular(16)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16)),
                             ),
                           ),
                           validator: (value) {
                             if (value == _passwordController.text) {
-                              setState(() {
-                                _showError = false;
-                              });
                               return null;
                             } else {
-                              setState(() {
-                                _showError = true;
-                              });
                               return "Passwords do not match";
                             }
                           },
                         ),
-                        if (_showError)
-                          const Text(
-                            'Confirm Password again',
-                            style: TextStyle(color: Colors.red),
-                          ),
                       ],
                     ),
                   ),
@@ -148,7 +138,7 @@ class _ContSignupState extends State<ContSignup> {
                             setState(() {
                               _isLoading = true;
                             });
-                            _handleSignUp();
+                            _handleSignUp(context);
                           }
                         },
                   style: ElevatedButton.styleFrom(
@@ -237,32 +227,60 @@ class _ContSignupState extends State<ContSignup> {
     );
   }
 
-  void _handleSignUp() async {
+  void _handleSignUp(BuildContext context) async {
     String password = _passwordController.text;
 
     try {
-      User? user = await _auth.signUpWithEmailAndPassword(widget.email, password);
+      User? user =
+          await _auth.signUpWithEmailAndPassword(widget.email, password);
 
       if (user != null) {
         // Save the username in the database or Firestore if necessary
         print("User is successfully created with username: ${widget.username}");
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'username': widget.username,
-        'email': widget.email,
-      });
-        // Navigate to the next screen or show success message
-        Navigator.pop(context); // or any other navigation logic
-      } else {
-        print("Error: User creation failed.");
-        // Handle the error (e.g., show a message)
-      }
-    } catch (e) {
-      print("Error: $e");
-      // Handle the error (e.g., show an error message)
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+          'username': widget.username,
+          'email': widget.email,
+        });
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Signup successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+    
+      Navigator.pop(context);
+    } else {
+      throw Exception("Email is used by another account.");
     }
+  } on FirebaseAuthException catch (e) {
+    // Use the message provided by Firebase
+    _showSnackBar(context, e.message ?? 'An unknown error occurred.');  
+    // Improved error message handling
+} catch (e) {
+    
+    _showSnackBar(context, e.toString());
+} finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
+
+void _showSnackBar(BuildContext context, String message) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  });
+}
 }
