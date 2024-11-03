@@ -24,7 +24,8 @@ class _SignupState extends State<Signup> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => ContSignup(username: username, email: email)),
+          builder: (context) => ContSignup(username: username, email: email),
+        ),
         (route) => false,
       );
     }

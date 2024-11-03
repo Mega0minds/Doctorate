@@ -17,6 +17,21 @@ class LogInState extends State<LogIn> {
 
   bool _showError = false;
 
+  String? _email;
+  void _proceed() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      String email = _email!.toLowerCase().trim();
+
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ContLogin(email: email),
+          ),
+          (route) => false);
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -82,7 +97,8 @@ class LogInState extends State<LogIn> {
                                   ),
                                   validator: (value) {
                                     if (value!.isNotEmpty &&
-                                        value.contains('@')) {
+                                        value.contains('@') &&
+                                        value.contains(".")) {
                                       setState(() {
                                         _showError = false;
                                       });
@@ -93,6 +109,9 @@ class LogInState extends State<LogIn> {
                                       });
                                       return "";
                                     }
+                                  },
+                                  onSaved: (value) {
+                                    _email = value;
                                   },
                                 ),
                                 if (_showError)
@@ -115,18 +134,7 @@ class LogInState extends State<LogIn> {
               Container(
                 alignment: Alignment.center,
                 child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_formKey.currentState!.validate()) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ContSignup(username: AutofillHints.username, email: AutofillHints.email),
-                          ),
-                        );
-                      }
-                    });
-                  },
+                  onPressed: _proceed,
                   style: ElevatedButton.styleFrom(
                     fixedSize: const Size(237, 56),
                     backgroundColor: AppColor.primary,
