@@ -33,6 +33,60 @@ class _ContSignupState extends State<ContSignup> {
     super.dispose();
   }
 
+  void _handleSignUp(BuildContext context) async {
+    String password = _passwordController.text;
+
+    try {
+      User? user =
+          await _auth.signUpWithEmailAndPassword(widget.email, password);
+
+      if (user != null) {
+        // Save the username in the database or Firestore if necessary
+        print("User is successfully created with username: ${widget.username}");
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'username': widget.username,
+          'email': widget.email,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Signup successful!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        Navigator.pop(context);
+      } else {
+        throw Exception("Email is used by another account.");
+      }
+    } on FirebaseAuthException catch (e) {
+      // Use the message provided by Firebase
+      _showSnackBar(context, e.message ?? 'An unknown error occurred.');
+      // Improved error message handling
+    } catch (e) {
+      _showSnackBar(context, e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -226,61 +280,4 @@ class _ContSignupState extends State<ContSignup> {
       ),
     );
   }
-
-  void _handleSignUp(BuildContext context) async {
-    String password = _passwordController.text;
-
-    try {
-      User? user =
-          await _auth.signUpWithEmailAndPassword(widget.email, password);
-
-      if (user != null) {
-        // Save the username in the database or Firestore if necessary
-        print("User is successfully created with username: ${widget.username}");
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'username': widget.username,
-          'email': widget.email,
-        });
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Signup successful!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-    
-      Navigator.pop(context);
-    } else {
-      throw Exception("Email is used by another account.");
-    }
-  } on FirebaseAuthException catch (e) {
-    // Use the message provided by Firebase
-    _showSnackBar(context, e.message ?? 'An unknown error occurred.');  
-    // Improved error message handling
-} catch (e) {
-    
-    _showSnackBar(context, e.toString());
-} finally {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-}
-
-
-void _showSnackBar(BuildContext context, String message) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  });
-}
 }

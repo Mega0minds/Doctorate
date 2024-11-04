@@ -12,7 +12,7 @@ class AuthServce {
     } catch (e) {
       print("Some Error Occured during SignUp: $e");
     }
-    return null;  
+    return null;
   }
 
   Future<User?> signInWithEmailAndPassword(
@@ -26,6 +26,4 @@ class AuthServce {
     }
     return null;
   }
-
-    
 }
