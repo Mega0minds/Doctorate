@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:docrate/Firebase_Files/Firebase_authservice.dart';
+import 'package:docrate/firebase_files/database.dart';
+import 'package:docrate/firebase_files/firebase_authservice.dart';
+import 'package:docrate/home.dart';
 import 'package:docrate/login.dart';
 import 'package:docrate/utilities/resource.dart';
+import 'package:docrate/utilities/show_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -23,9 +26,15 @@ class _ContSignupState extends State<ContSignup> {
   final AuthServce _auth = AuthServce();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
   bool _passwordValid = false;
   bool _isLoading = false;
+  bool _isVisible = true;
+
+  void _toggleVisiblity() {
+    setState(() {
+      _isVisible = !_isVisible;
+    });
+  }
 
   @override
   void dispose() {
@@ -35,18 +44,22 @@ class _ContSignupState extends State<ContSignup> {
 
   void _handleSignUp(BuildContext context) async {
     String password = _passwordController.text;
+    final Database database = Database();
 
     try {
       User? user =
           await _auth.signUpWithEmailAndPassword(widget.email, password);
 
-      if (user != null) {
-        // Save the username in the database or Firestore if necessary
-        print("User is successfully created with username: ${widget.username}");
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'username': widget.username,
-          'email': widget.email,
-        });
+      // Save the username in the database or Firestore if necessary
+      debugPrint(
+          "User is successfully created with username: ${widget.username}");
+
+      await database.storeUserInfo(
+        'users',
+        'username',
+        widget.username,
+      );
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Signup successful!'),
@@ -54,37 +67,31 @@ class _ContSignupState extends State<ContSignup> {
             duration: Duration(seconds: 2),
           ),
         );
-
-        Navigator.pop(context);
-      } else {
-        throw Exception("Email is used by another account.");
+      }
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Home(),
+          ),
+          (route) => false,
+        );
       }
     } on FirebaseAuthException catch (e) {
       // Use the message provided by Firebase
-      _showSnackBar(context, e.message ?? 'An unknown error occurred.');
+
+      showSnackBar(context, 'An unknown error occurred.');
+
       // Improved error message handling
     } catch (e) {
-      _showSnackBar(context, e.toString());
+      if (context.mounted) {
+        showSnackBar(context, e.toString());
+      }
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: const TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    });
   }
 
   @override
@@ -123,13 +130,19 @@ class _ContSignupState extends State<ContSignup> {
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(
+                          obscureText: _isVisible,
+                          decoration: InputDecoration(
                             labelText: "Set Password",
                             border: OutlineInputBorder(
                               borderSide: BorderSide(width: 1),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(16)),
                             ),
+                            suffixIcon: IconButton(
+                                onPressed: _toggleVisiblity,
+                                icon: _isVisible
+                                    ? Icon(Icons.visibility_off)
+                                    : Icon(Icons.remove_red_eye)),
                           ),
                           validator: (value) {
                             if (value != null && value.length > 6) {
@@ -160,14 +173,19 @@ class _ContSignupState extends State<ContSignup> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: "Confirm Password",
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(width: 1),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(16)),
-                            ),
-                          ),
+                          decoration: InputDecoration(
+                              labelText: "Confirm Password",
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(width: 1),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16)),
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: _toggleVisiblity,
+                                icon: _isVisible
+                                    ? Icon(Icons.visibility_off)
+                                    : Icon(Icons.remove_red_eye),
+                              )),
                           validator: (value) {
                             if (value == _passwordController.text) {
                               return null;

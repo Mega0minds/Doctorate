@@ -1,5 +1,7 @@
-import 'package:docrate/Firebase_Files/Firebase_authservice.dart';
+import 'package:docrate/firebase_files/firebase_authservice.dart';
+import 'package:docrate/home.dart';
 import 'package:docrate/utilities/resource.dart';
+import 'package:docrate/utilities/show_snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -20,40 +22,45 @@ class ContLoginState extends State<ContLogin> {
   final AuthServce _auth = AuthServce();
   String? _pass;
 
-  void _proceedLogin(BuildContext context) async {
-
+  void _proceedLogin() async {
     _formkey.currentState!.save(); // Save form to assign value to `_pass`
-    String password = _pass ?? '';
+    String? password = _pass;
 
     try {
-      User? user = await _auth.signInWithEmailAndPassword(widget.email, password);
+      // Check if the user exists by signing in with email and an invalid password
+      User? user = await _auth.signInWithEmailAndPassword(
+        widget.email,
+        password!,
+      );
 
       if (user != null) {
-        Navigator.pop(context);
-        print("Sign-in successful");
+        // User exists and password is correct
+        // if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Home(),
+            ),
+            (route) => false);
+        debugPrint("Sign-in successful");
+        // }
       } else {
-        _showSnackBar(context, 'Incorrect password');
+        showSnackBar(context, 'Incorrect password');
       }
     } on FirebaseAuthException catch (e) {
-      _showSnackBar(context, e.message ?? 'An unknown error occurred.');
+      if (e.code == 'user-not-found') {
+        showSnackBar(context, 'User doesn\'t exist');
+        debugPrint("user not found");
+      } else if (e.code == 'wrong-password') {
+        showSnackBar(context, 'Incorrect password');
+      } else {
+        if (context.mounted) {
+          showSnackBar(context, e.message ?? 'An unknown error occurred.');
+        }
+      }
     } catch (e) {
-      _showSnackBar(context, 'Error: ${e.toString()}');
+      showSnackBar(context, 'Error: ${e.toString()}');
     }
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: const TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    });
   }
 
   @override
@@ -127,7 +134,7 @@ class ContLoginState extends State<ContLogin> {
                           const SizedBox(height: 32),
                           Center(
                             child: ElevatedButton(
-                              onPressed: () => _proceedLogin(context),
+                              onPressed: _proceedLogin,
                               style: ElevatedButton.styleFrom(
                                 fixedSize: const Size(237, 56),
                                 backgroundColor: AppColor.primary,

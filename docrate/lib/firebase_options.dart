@@ -46,16 +46,16 @@ class DefaultFirebaseOptions {
     messagingSenderId: '927971756351',
     projectId: 'doctorate-9d101',
     authDomain: 'doctorate-9d101.firebaseapp.com',
-    storageBucket: 'doctorate-9d101.appspot.com',
+    storageBucket: 'doctorate-9d101.firebasestorage.app',
     measurementId: 'G-QNTN0CKNX4',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBuF8EemSlavdUweJEDC_Y_jUf5SB46fd8',
-    appId: '1:927971756351:android:49c9472860464062962b8a',
+    appId: '1:927971756351:android:4c14f06c4a5f6a7a962b8a',
     messagingSenderId: '927971756351',
     projectId: 'doctorate-9d101',
-    storageBucket: 'doctorate-9d101.appspot.com',
+    storageBucket: 'doctorate-9d101.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     appId: '1:927971756351:ios:17d82eebef30c6bb962b8a',
     messagingSenderId: '927971756351',
     projectId: 'doctorate-9d101',
-    storageBucket: 'doctorate-9d101.appspot.com',
+    storageBucket: 'doctorate-9d101.firebasestorage.app',
     iosBundleId: 'com.example.docrate',
   );
 
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     appId: '1:927971756351:ios:17d82eebef30c6bb962b8a',
     messagingSenderId: '927971756351',
     projectId: 'doctorate-9d101',
-    storageBucket: 'doctorate-9d101.appspot.com',
+    storageBucket: 'doctorate-9d101.firebasestorage.app',
     iosBundleId: 'com.example.docrate',
   );
 
@@ -82,7 +82,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '927971756351',
     projectId: 'doctorate-9d101',
     authDomain: 'doctorate-9d101.firebaseapp.com',
-    storageBucket: 'doctorate-9d101.appspot.com',
+    storageBucket: 'doctorate-9d101.firebasestorage.app',
     measurementId: 'G-6H7EWQFJ40',
   );
 
